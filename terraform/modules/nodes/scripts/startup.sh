@@ -15,3 +15,6 @@ apt-get install apt-transport-https \
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
 mv kubectl /usr/local/bin/
+
+# Passwordless sudo
+echo "ubuntu    ALL = (ALL) NOPASSWD: ALL" >> /etc/sudoers

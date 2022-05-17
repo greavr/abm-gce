@@ -52,6 +52,29 @@ module "vpc" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Generate SSH Key
+# ----------------------------------------------------------------------------------------------------------------------
+module "ssh-key" {
+    source = "./modules/ssh-key"
+
+    depends_on = [
+        google_project_service.enable-services,
+    ]
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Generate SAs
+# ----------------------------------------------------------------------------------------------------------------------
+module "abm-sa" {
+    source = "./modules/abm_sa"
+    project_id = var.project_id
+
+    depends_on = [
+        google_project_service.enable-services,
+    ]
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Build Nodes
 # ----------------------------------------------------------------------------------------------------------------------
 module "nodes" {
@@ -65,16 +88,18 @@ module "nodes" {
     network = module.vpc.vpc_id
     subnetwork = module.vpc.primary_region
     project_id = var.project_id
+    public-key = module.ssh-key.public-key
 
     depends_on = [
-      module.vpc
+      module.vpc,
+      module.ssh-key
     ]
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Build Workstation
 # ----------------------------------------------------------------------------------------------------------------------
-module "master-nodes" {
+module "amb-workstation" {
     source = "./modules/abm_workstation"
 
     zone = "${module.vpc.primary_region}-a"
@@ -85,8 +110,12 @@ module "master-nodes" {
     node-os = var.gce-instance-os
     subnetwork = module.vpc.primary_region
     project_id = var.project_id
-    
+    private-key = module.ssh-key.secret-name
+    public-key = module.ssh-key.public-key
+    sa-key-list = module.abm-sa.secrets-list
+
     depends_on = [
-      module.nodes
+      module.nodes,
+      module.abm-sa
     ]
 }

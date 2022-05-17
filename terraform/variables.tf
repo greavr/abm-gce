@@ -35,6 +35,7 @@ variable "services_to_enable" {
     default =  [
         "compute.googleapis.com",
         "iap.googleapis.com",
+        "secretmanager.googleapis.com",
         "cloudbuild.googleapis.com",
         "composer.googleapis.com",
         "anthos.googleapis.com",
@@ -49,7 +50,10 @@ variable "services_to_enable" {
         "monitoring.googleapis.com",
         "opsconfigmonitoring.googleapis.com",
         "serviceusage.googleapis.com",
-        "stackdriver.googleapis.com"
+        "stackdriver.googleapis.com",
+        "servicemanagement.googleapis.com",
+        "servicecontrol.googleapis.com",
+        "storage.googleapis.com"
     ]
 }
 
