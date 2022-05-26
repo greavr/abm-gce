@@ -19,11 +19,11 @@ resource "google_project_iam_member" "service_account-roles" {
 resource "google_compute_instance" "workstation" {
     name  = "abm-workstation"
     hostname  = "abm-workstation.${var.project_id}"
-    machine_type = var.node-spec
+    machine_type = "n2-standard-4"
     zone         = var.zone
     can_ip_forward = true
-
     allow_stopping_for_update = true
+
 
     tags = ["abm","abm-worker"]
 
@@ -52,6 +52,8 @@ resource "google_compute_instance" "workstation" {
         abm-private-key = var.private-key,
         sa-key-list = join(",",var.sa-key-list)
         ssh-keys = "ubuntu:${var.public-key}"
+        template-path = var.template-path
+        vx-ip = var.vx-ip
     }
 
     service_account {

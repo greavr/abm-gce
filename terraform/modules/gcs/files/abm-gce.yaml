@@ -1,0 +1,124 @@
+gcrKeyPath: /abm/storage-sa-key.json
+sshPrivateKeyPath: /root/.ssh/id_rsa
+gkeConnectAgentServiceAccountKeyPath: /abm/connect-agent-key.json
+gkeConnectRegisterServiceAccountKeyPath: /abm/connect-register-key.json
+cloudOperationsServiceAccountKeyPath: /abm/logging-sa-key.json
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cluster-abm-gce
+---
+apiVersion: baremetal.cluster.gke.io/v1
+kind: Cluster
+metadata:
+  name: abm-gce
+  namespace: cluster-abm-gce
+spec:
+  type: standalone
+  profile: default
+  # Anthos cluster version.
+  anthosBareMetalVersion: 1.11.1
+  # GKE connect configuration
+  gkeConnect:
+    projectID: abm-gce-350501
+  # Control plane configuration
+  controlPlane:
+    nodePoolSpec:
+      nodes:
+      # Control plane node pools. Typically, this is either a single machine
+      # or 3 machines if using a high availability deployment.
+      - address: cp_1
+  # Cluster networking configuration
+  clusterNetwork:
+    # Pods specify the IP ranges from which pod networks are allocated.
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+    # Services specify the network ranges from which service virtual IPs are allocated.
+    # This can be any RFC1918 range that does not conflict with any other IP range
+    # in the cluster and node pool resources.
+    services:
+      cidrBlocks:
+      - 10.96.0.0/20
+  # Load balancer configuration
+  loadBalancer:
+    # Load balancer mode can be either 'bundled' or 'manual'.
+    # In 'bundled' mode a load balancer will be installed on load balancer nodes during cluster creation.
+    # In 'manual' mode the cluster relies on a manually-configured external load balancer.
+    mode: bundled
+    # Load balancer port configuration
+    ports:
+      # Specifies the port the load balancer serves the Kubernetes control plane on.
+      # In 'manual' mode the external load balancer must be listening on this port.
+      controlPlaneLBPort: 443
+    # There are two load balancer virtual IP (VIP) addresses: one for the control plane
+    # and one for the L7 Ingress service. The VIPs must be in the same subnet as the load balancer nodes.
+    # These IP addresses do not correspond to physical network interfaces.
+    vips:
+      # ControlPlaneVIP specifies the VIP to connect to the Kubernetes API server.
+      # This address must not be in the address pools below.
+      controlPlaneVIP: 10.200.0.10
+      ingressVIP: 10.200.0.15
+    addressPools:
+    - name: pool1
+      addresses:
+      - 10.200.0.15-10.200.0.25
+
+  # Logging and Monitoring
+  clusterOperations:
+    # Cloud project for logs and metrics.
+    projectID: project_id
+    # Cloud location for logs and metrics.
+    location: us-central1
+    # Whether collection of application logs/metrics should be enabled (in addition to
+    # collection of system logs/metrics which correspond to system components such as
+    # Kubernetes control plane or cluster management agents).
+    enableApplication: true
+  # Storage configuration
+  storage:
+    # lvpNodeMounts specifies the config for local PersistentVolumes backed by mounted disks.
+    # These disks need to be formatted and mounted by the user, which can be done before or after
+    # cluster creation.
+    lvpNodeMounts:
+      # path specifies the host machine path where mounted disks will be discovered and a local PV
+      # will be created for each mount.
+      path: /mnt/localpv-disk
+      # storageClassName specifies the StorageClass that PVs will be created with. The StorageClass
+      # is created during cluster creation.
+      storageClassName: local-disks
+    # lvpShare specifies the config for local PersistentVolumes backed by subdirectories in a shared filesystem.
+    # These subdirectories are automatically created during cluster creation.
+    lvpShare:
+      # path specifies the host machine path where subdirectories will be created on each host. A local PV
+      # will be created for each subdirectory.
+      path: /mnt/localpv-share
+      # storageClassName specifies the StorageClass that PVs will be created with. The StorageClass
+      # is created during cluster creation.
+      storageClassName: local-shared
+      # numPVUnderSharedPath specifies the number of subdirectories to create under path.
+      numPVUnderSharedPath: 5
+  # NodeConfig specifies the configuration that applies to all nodes in the cluster.
+  nodeConfig:
+    # podDensity specifies the pod density configuration.
+    podDensity:
+      # maxPodsPerNode specifies at most how many pods can be run on a single node.
+      maxPodsPerNode: 250
+    # containerRuntime specifies which container runtime to use for scheduling containers on nodes.
+    # containerd and docker are supported. docker will not be supported starting with Anthos Bare Metal version 1.13.
+    containerRuntime: containerd
+  nodeAccess:
+    loginUser: ubuntu
+---
+# Node pools for worker nodes
+apiVersion: baremetal.cluster.gke.io/v1
+kind: NodePool
+metadata:
+  name: node-pool-1
+  namespace: cluster-abm-gce
+spec:
+  clusterName: abm-gce
+  nodes:
+  - address: node_0
+  - address: node_1
+  - address: node_2

@@ -44,6 +44,8 @@ module "vpc" {
   project_id = var.project_id
   regions = var.regions
   vpc-name = var.vpc-name
+  firewall-ports-tcp = var.abm-firewall-ports-tcp
+  firewall-ports-udp = var.abm-firewall-ports-udp
   
   depends_on = [
     google_project_service.enable-services,
@@ -89,11 +91,31 @@ module "nodes" {
     subnetwork = module.vpc.primary_region
     project_id = var.project_id
     public-key = module.ssh-key.public-key
+    vx-ip-master = 3
+    vx-ip-worker = 4
+
 
     depends_on = [
       module.vpc,
       module.ssh-key
     ]
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# GCS For template files
+# ----------------------------------------------------------------------------------------------------------------------
+
+module "gcs" {
+  source = "./modules/gcs"
+
+  project_id = var.project_id
+  gcs-bucket-name = var.gcs-bucket-name
+
+
+  depends_on = [
+    google_project_service.enable-services
+  ]
+  
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -113,9 +135,12 @@ module "amb-workstation" {
     private-key = module.ssh-key.secret-name
     public-key = module.ssh-key.public-key
     sa-key-list = module.abm-sa.secrets-list
+    template-path = module.gcs.abm-template-file
+    vx-ip = 2
 
     depends_on = [
       module.nodes,
+      module.gcs,
       module.abm-sa
     ]
 }

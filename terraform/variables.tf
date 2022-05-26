@@ -18,13 +18,11 @@ variable "regions" {
     type = list(object({
         region = string
         cidr = string
-        management-cidr = string
         })
     )
     default = [{
-            region = "us-west1"
-            cidr = "10.0.0.0/20"
-            management-cidr = "192.168.10.0/28"
+            region = "us-central1"
+            cidr = "10.0.0.0/24"
         },]
 }
 
@@ -75,7 +73,7 @@ variable "worker-node-count" {
 variable "gce-instance-type" {
   description = "GCE Instance Spec"
   type = string
-  default = "n2-standard-2"
+  default = "e2-standard-2"
 }
 
 # Instance OS
@@ -83,5 +81,41 @@ variable "gce-instance-os" {
     description = "GCE Instance OS"
     type = string
     default = "ubuntu-os-cloud/ubuntu-minimal-2004-lts"
+  
+}
+
+# Storage Bucket
+variable "gcs-bucket-name" {
+    default = "abm-config"
+    description = "Bucket used to store kubectl config and abm template"
+    type = string
+    }
+
+# Firewall rules
+variable "abm-firewall-ports-tcp" {
+    description = "Ports required for abm"
+    type = list(string)
+    default = [ 
+        "6444",
+        "10250",
+        "2379-2380",
+        "10250-10252",
+        "10256",
+        "4240",
+        "30000-32767",
+        "7946",
+        "443",
+        "22"
+        ]
+  
+}
+
+variable "abm-firewall-ports-udp" {
+    description = "Ports required for abm"
+    type = list(string)
+    default = [ 
+        "6081",
+        "7946"
+        ]
   
 }

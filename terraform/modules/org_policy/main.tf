@@ -32,11 +32,11 @@ resource "google_project_organization_policy" "enable-key-creation" {
 #     }
 # }
 
-resource "time_sleep" "wait_30_seconds" {
+resource "time_sleep" "wait_X_seconds" {
     depends_on = [
         google_project_organization_policy.enable-ip-forward,
         google_project_organization_policy.enable-key-creation
         ]
 
-    create_duration = "30s"
+    create_duration = var.pause-time
 }

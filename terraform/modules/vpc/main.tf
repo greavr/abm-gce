@@ -13,7 +13,9 @@ resource "google_compute_subnetwork" "subnets" {
   ip_cidr_range =  "${each.value.cidr}"       
   region        = "${each.value.region}"
   network       = google_compute_network.demo-vpc.id
-  depends_on = [google_compute_network.demo-vpc]
+  depends_on = [
+    google_compute_network.demo-vpc
+    ]
 }
 
 resource "google_compute_router" "primary" {
@@ -44,3 +46,5 @@ resource "google_compute_router_nat" "nat" {
 
   depends_on = [google_compute_router.primary]
 }
+
+

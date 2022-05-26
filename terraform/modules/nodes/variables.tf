@@ -7,6 +7,8 @@ variable "subnetwork" {}
 variable "node-os" {}
 variable "project_id" {}
 variable "public-key" {}
+variable "vx-ip-master" {}
+variable "vx-ip-worker" {}
 
 variable "gce-roles" {
     default = [

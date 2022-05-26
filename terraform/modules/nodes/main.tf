@@ -23,13 +23,14 @@ resource "google_compute_instance" "masters" {
     machine_type = var.node-spec
     zone         = var.zone
     can_ip_forward = true
+    allow_stopping_for_update = true
 
     tags = ["abm","abm-master"]
 
     boot_disk {
         initialize_params {
             image = var.node-os
-            size = 60
+            size = 80
         }
     }
 
@@ -47,6 +48,7 @@ resource "google_compute_instance" "masters" {
 
     metadata = {
         ssh-keys = "ubuntu:${var.public-key}"
+        vx-ip = var.vx-ip-master + count.index
     }
 
     service_account {
@@ -71,12 +73,13 @@ resource "google_compute_instance" "workers" {
     machine_type = var.node-spec
     zone         = var.zone
     can_ip_forward = true
+    allow_stopping_for_update = true
 
     tags = ["abm","abm-worker"]
 
     boot_disk {
         initialize_params {
-            image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
+            image = var.node-os
             size = 60
         }
     }
@@ -95,6 +98,7 @@ resource "google_compute_instance" "workers" {
 
     metadata = {
         ssh-keys = "ubuntu:${var.public-key}"
+        vx-ip = var.vx-ip-worker + count.index
     }
 
     service_account {
@@ -122,26 +126,4 @@ resource "google_compute_firewall" "iap" {
   }
 
   source_ranges = ["35.235.240.0/20"]
-}
-
-# ----------------------------------------------------------------------------------------------------------------------
-# IAP Firewall Rule
-# ----------------------------------------------------------------------------------------------------------------------
-resource "google_compute_firewall" "abm" {
-  name    = "allow-abm"
-  network = var.network
-
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22","443","4240","7946","10256"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports    = ["6081","7946"]
-  }
-
-  source_tags = ["abm"]
-  target_tags = ["abm"]
 }

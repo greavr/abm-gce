@@ -9,6 +9,8 @@ variable "worker-node-ips" {}
 variable "private-key" {}
 variable "public-key" {}
 variable "sa-key-list" {}
+variable "template-path" {}
+variable "vx-ip" {}
 
 variable "gce-roles" {
     default = [

@@ -20,6 +20,7 @@ resource "google_project_iam_member" "connect-agent-roles" {
 
 resource "google_service_account_key" "connect-agent-key" {
   service_account_id = google_service_account.connect-agent.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
 
   depends_on = [
         google_service_account.connect-agent
@@ -37,7 +38,7 @@ resource "google_secret_manager_secret" "connect-agent-key" {
 
 resource "google_secret_manager_secret_version" "connect-agent-key" {
   secret = google_secret_manager_secret.connect-agent-key.id
-  secret_data = google_service_account_key.connect-agent-key.private_key
+  secret_data = base64decode(google_service_account_key.connect-agent-key.private_key)
 
   depends_on = [
     google_service_account_key.connect-agent-key,
@@ -68,6 +69,7 @@ resource "google_project_iam_member" "connect-register-roles" {
 
 resource "google_service_account_key" "connect-register-key" {
   service_account_id = google_service_account.connect-register.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
 
 
   depends_on = [
@@ -86,7 +88,7 @@ resource "google_secret_manager_secret" "connect-register-key" {
 
 resource "google_secret_manager_secret_version" "connect-register-key" {
   secret = google_secret_manager_secret.connect-register-key.id
-  secret_data = google_service_account_key.connect-register-key.private_key
+  secret_data = base64decode(google_service_account_key.connect-register-key.private_key)
 
   depends_on = [
     google_service_account_key.connect-register-key,
@@ -116,6 +118,7 @@ resource "google_project_iam_member" "logging-sa-roles" {
 
 resource "google_service_account_key" "logging-sa-key" {
   service_account_id = google_service_account.logging-sa.name
+  public_key_type    = "TYPE_X509_PEM_FILE"
 
 
   depends_on = [
@@ -134,7 +137,7 @@ resource "google_secret_manager_secret" "logging-sa-key" {
 
 resource "google_secret_manager_secret_version" "logging-sa-key" {
   secret = google_secret_manager_secret.logging-sa-key.id
-  secret_data = google_service_account_key.logging-sa-key.private_key
+  secret_data = base64decode(google_service_account_key.logging-sa-key.private_key)
 
   depends_on = [
     google_service_account_key.logging-sa-key,
@@ -164,7 +167,7 @@ resource "google_project_iam_member" "storage-sa-roles" {
 
 resource "google_service_account_key" "storage-sa-key" {
   service_account_id = google_service_account.storage-sa.name
-
+  public_key_type    = "TYPE_X509_PEM_FILE"
 
   depends_on = [
         google_service_account.storage-sa
@@ -182,7 +185,7 @@ resource "google_secret_manager_secret" "storage-sa-key" {
 
 resource "google_secret_manager_secret_version" "storage-sa-key" {
   secret = google_secret_manager_secret.storage-sa-key.id
-  secret_data = google_service_account_key.storage-sa-key.private_key
+  secret_data = base64decode(google_service_account_key.storage-sa-key.private_key)
 
   depends_on = [
     google_service_account_key.storage-sa-key,
