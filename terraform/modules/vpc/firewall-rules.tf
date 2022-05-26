@@ -7,17 +7,7 @@ resource "google_compute_firewall" "abm-rules" {
     network = var.vpc-name
 
     allow {
-        protocol = "tcp"
-        ports    = var.firewall-ports-tcp
-    }
-
-    allow {
-        protocol = "icmp"
-    }
-
-    allow {
-        protocol = "udp"
-        ports    = var.firewall-ports-udp
+        protocol = "all"
     }
 
     source_tags = ["abm"]

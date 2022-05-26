@@ -21,14 +21,14 @@ spec:
   anthosBareMetalVersion: 1.11.1
   # GKE connect configuration
   gkeConnect:
-    projectID: abm-gce-350501
+    projectID: project_id
   # Control plane configuration
   controlPlane:
     nodePoolSpec:
       nodes:
       # Control plane node pools. Typically, this is either a single machine
       # or 3 machines if using a high availability deployment.
-      - address: cp_1
+      - address: 10.200.0.2
   # Cluster networking configuration
   clusterNetwork:
     # Pods specify the IP ranges from which pod networks are allocated.
@@ -119,6 +119,6 @@ metadata:
 spec:
   clusterName: abm-gce
   nodes:
-  - address: node_0
-  - address: node_1
-  - address: node_2
+  - address: 10.200.0.3
+  - address: 10.200.0.4
+  - address: 10.200.0.5

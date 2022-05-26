@@ -12,7 +12,9 @@ apt-get install apt-transport-https \
   docker.io \
   ntpdate \
   net-tools \
-  jq -y
+  jq \
+  nano \
+  iputils-ping -y
 
 
 # Configure BMCTL
@@ -32,7 +34,18 @@ echo "ubuntu    ALL = (ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo 1 > /proc/sys/net/ipv4/ip_forward
 I=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/vx-ip" -H "Metadata-Flavor: Google")
 
-IPs=("10.0.0.2" "10.0.0.3" "10.0.0.4" "10.0.0.5" "10.0.0.6")
+
+# Build Nodie IP list
+WORKER_IPs=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/worker-node-ips" -H "Metadata-Flavor: Google")
+MASTER_IPs=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/master-node-ips" -H "Metadata-Flavor: Google")
+IP_LIST="$WORKER_IPs,$MASTER_IPs"
+IFS=', ' read -r -a IPs <<< "$IP_LIST"
+for ip in ${IPs[@]}; do
+    echo $ip
+done
+
+
+
 ip link add vxlan0 type vxlan id 42 dev ens4 dstport 0
 current_ip=$(ip --json a show dev ens4 | jq '.[0].addr_info[0].local' -r)
 echo "VM IP address is: $current_ip"
@@ -72,23 +85,12 @@ export CLOUD_PROJECT_ID=$(gcloud config get-value project)
 bmctl create config -c abm-gce --project-id=$CLOUD_PROJECT_ID  >> log.log
 
 rm /abm/bmctl-workspace/abm-gce/abm-gce.yaml
+#### WHY DOES THIS NOT WORK ####
 ABM_TEMPLATE=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/template-path	" -H "Metadata-Flavor: Google")  >> log.log
+################################
 echo $ABM_TEMPLATE >> log.log
 gsutil cp $ABM_TEMPLATE /abm/bmctl-workspace/abm-gce/abm-gce.yaml  >> log.log
 chmod 777 /abm/bmctl-workspace/abm-gce/*  >> log.log
-
-# Update Values
-ABM_CP=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/master-node-ips" -H "Metadata-Flavor: Google")  >> log.log
-sed -i "s/cp\_1/$ABM_CP/g" /abm/bmctl-workspace/abm-gce/abm-gce.yaml  >> log.log
-
-ABM_WORKERS=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/worker-node-ips" -H "Metadata-Flavor: Google")  >> log.log
-IFS=', ' read -r -a array <<< "$ABM_WORKERS"  >> log.log
-
-for i in "${!array[@]}"
-do
-  NODE="node_$i"
-  sed -i "s/$NODE/${array[$i]}/g" /abm/bmctl-workspace/abm-gce/abm-gce.yaml  >> log.log
-done
 
 sed -i "s/project\_id/$CLOUD_PROJECT_ID/g" /abm/bmctl-workspace/abm-gce/abm-gce.yaml
 

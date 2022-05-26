@@ -30,7 +30,7 @@ resource "google_compute_instance" "masters" {
     boot_disk {
         initialize_params {
             image = var.node-os
-            size = 80
+            size = 160
         }
     }
 
@@ -80,7 +80,7 @@ resource "google_compute_instance" "workers" {
     boot_disk {
         initialize_params {
             image = var.node-os
-            size = 60
+            size = 120
         }
     }
 
