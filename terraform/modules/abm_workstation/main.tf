@@ -30,7 +30,7 @@ resource "google_compute_instance" "workstation" {
     boot_disk {
         initialize_params {
             image = var.node-os
-            size = 60
+            size = 160
         }
     }
 

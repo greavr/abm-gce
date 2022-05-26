@@ -86,7 +86,7 @@ bmctl create config -c abm-gce --project-id=$CLOUD_PROJECT_ID  >> log.log
 
 rm /abm/bmctl-workspace/abm-gce/abm-gce.yaml
 #### WHY DOES THIS NOT WORK ####
-ABM_TEMPLATE=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/template-path	" -H "Metadata-Flavor: Google")  >> log.log
+ABM_TEMPLATE=$(curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/template-path" -H "Metadata-Flavor: Google")  >> log.log
 ################################
 echo $ABM_TEMPLATE >> log.log
 gsutil cp $ABM_TEMPLATE /abm/bmctl-workspace/abm-gce/abm-gce.yaml  >> log.log

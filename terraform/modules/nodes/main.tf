@@ -80,7 +80,7 @@ resource "google_compute_instance" "workers" {
     boot_disk {
         initialize_params {
             image = var.node-os
-            size = 120
+            size = 160
         }
     }
 
